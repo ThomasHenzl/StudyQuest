@@ -623,7 +623,7 @@ function RanksPage({ totalXP, homework, grades, studySessions }: {
           {nextRank ? <><div className="text-[#9293a5]">Noch bis {nextRank.name}</div><div className="mt-1 font-bold text-violet-200">{xpToNextRank.toLocaleString("de-DE")} XP</div></> : <><div className="text-amber-200">Höchster Rang erreicht</div><div className="mt-1 font-bold text-white">Du bist ein Meister!</div></>}
         </div>
       </div>
-      <p className="relative mt-5 border-t border-white/[.06] pt-4 text-xs leading-5 text-[#85869a]">Jeden Tag um 00:00 UTC werden automatisch 20 XP abgezogen. Wenn die App geschlossen ist, werden fehlende Tage beim nächsten Öffnen nachgeholt; dein XP-Stand fällt nie unter 0.</p>
+      <p className="relative mt-5 border-t border-white/[.06] pt-4 text-xs leading-5 text-[#85869a]">Jeden Tag um 00:00 UTC werden automatisch 4 XP abgezogen. Wenn die App geschlossen ist, werden fehlende Tage beim nächsten Öffnen nachgeholt; dein XP-Stand fällt nie unter 0.</p>
     </section>
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {rankTiers.map((rank, index) => {

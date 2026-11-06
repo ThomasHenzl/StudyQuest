@@ -98,7 +98,7 @@ function applyLocalDailyXpDecay(userData: UserData) {
   }
   const elapsedDays = Math.floor((todayMs - lastDateMs) / 86_400_000);
   if (elapsedDays < 1) return;
-  userData.profile.total_xp = Math.max(0, userData.profile.total_xp - elapsedDays * 20);
+  userData.profile.total_xp = Math.max(0, userData.profile.total_xp - elapsedDays * 4);
   userData.profile.xp_decay_date = today;
 }
 function xpForGrade(grade: number, type: "test" | "exam") {

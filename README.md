@@ -19,7 +19,7 @@ Ohne Supabase läuft StudyQuest im lokalen Testmodus. Konto und Fortschritt blei
 Ohne Supabase ist die Website öffentlich erreichbar, aber Konten und Lernstände werden nur lokal im jeweiligen Browser gespeichert und nicht zwischen Geräten synchronisiert. Für gemeinsame Online-Daten:
 
 1. Erstelle ein Projekt auf [supabase.com](https://supabase.com/) und öffne dessen **SQL Editor**.
-2. Führe die drei Dateien unter `supabase/migrations/` der Reihe nach aus: zuerst `202611050001_studyquest.sql`, dann `202611050002_adjustable_study_time.sql` und zuletzt `202611060001_daily_xp_decay.sql`.
+2. Führe die vier Dateien unter `supabase/migrations/` der Reihe nach aus: `202611050001_studyquest.sql`, `202611050002_adjustable_study_time.sql`, `202611060001_daily_xp_decay.sql` und `202611060002_reduce_daily_xp_decay.sql`.
 3. Öffne in GitHub **Settings → Secrets and variables → Actions → Variables** und füge diese Repository-Variablen hinzu:
    - `VITE_SUPABASE_URL`: die **Project URL** aus den Supabase-Projekteinstellungen
    - `VITE_SUPABASE_ANON_KEY`: der **anon/public key** aus den Supabase-API-Einstellungen
@@ -30,7 +30,7 @@ Der Deploy-Workflow verwendet diese Variablen beim Build. Der anon/public key is
 ## Echtes Online-Konto (optional)
 
 1. Installiere die Abhängigkeiten: `npm install`
-2. Führe die drei SQL-Dateien unter `supabase/migrations/` der Reihe nach im SQL-Editor deines Supabase-Projekts aus.
+2. Führe die vier SQL-Dateien unter `supabase/migrations/` der Reihe nach im SQL-Editor deines Supabase-Projekts aus.
 3. Kopiere `.env.example` nach `.env.local` und trage die Project URL sowie den anon/public key aus den Supabase-Projekteinstellungen ein.
 4. Starte die App mit `npm run dev` neu. Einen Produktionsbuild erstellst du mit `npm run build`.
 
@@ -43,6 +43,6 @@ Mit konfiguriertem Supabase werden Registrierung, Anmeldung und Fortschritt übe
 - Testnoten 1–5: 200 / 150 / 100 / 50 / 0 XP
 - Prüfungsnoten 1–5: 400 / 300 / 200 / 100 / 0 XP
 - Levels benötigen jeweils 100 XP; die maximale Stufe ist 100.
-- Beim ersten Laden an einem neuen UTC-Kalendertag werden automatisch 20 XP abgezogen. Nach Pausen werden versäumte Tagesabzüge nachgeholt; XP können nicht unter 0 fallen.
+- Beim ersten Laden an einem neuen UTC-Kalendertag werden automatisch 4 XP abgezogen. Nach Pausen werden versäumte Tagesabzüge nachgeholt; XP können nicht unter 0 fallen.
 - Die Ränge reichen von Anfänger (Level 1) bis Meister (Level 76–100). Die Ränge-Ansicht zeigt den aktuellen und den höchsten Rang sowie einen eigenen Rang pro Fach. Fach-XP kommen aus Lernzeit, Noten und erledigten Aufgaben; Fachlevel benötigen 20 XP statt 100 XP.
 - Wiederholte Abschlüsse und Quest-/Achievement-Belohnungen sind pro Datensatz bzw. Zeitraum gegen doppelte XP abgesichert.

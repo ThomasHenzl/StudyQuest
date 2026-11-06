@@ -22,7 +22,7 @@ begin
   if not found then raise exception 'Profil nicht gefunden'; end if;
 
   if last_decay_date < today then
-    xp_removed := least(current_xp, (today - last_decay_date) * 20);
+    xp_removed := least(current_xp, (today - last_decay_date) * 4);
     update public.profiles
     set total_xp = total_xp - xp_removed,
         xp_decay_date = today
