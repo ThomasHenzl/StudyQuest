@@ -586,33 +586,6 @@ function RanksPage({ totalXP, homework, grades, studySessions }: {
   const subjectRanks = [...subjectProgress.values()].sort((a, b) => b.xp - a.xp || a.subject.localeCompare(b.subject, "de"));
   return <div className="space-y-5">
     <PageIntro icon={ShieldCheck} title="Ränge" description="Sieh deinen Fortschritt und alle erreichbaren Ränge." />
-    <section className="panel relative overflow-hidden rounded-2xl p-5 sm:p-6">
-      <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-violet-600/10 blur-3xl" />
-      <div className="relative flex flex-wrap items-center justify-between gap-5">
-        <div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#898a9f]">Dein aktueller Rang</p><h2 className="display-font mt-2 text-3xl font-bold text-violet-200">{currentRank}</h2><p className="mt-1 text-sm text-[#9293a5]">Level {level} · {totalXP.toLocaleString("de-DE")} XP</p></div>
-        <div className="rounded-xl border border-white/[.07] bg-black/15 px-4 py-3 text-sm">
-          {nextRank ? <><div className="text-[#9293a5]">Noch bis {nextRank.name}</div><div className="mt-1 font-bold text-violet-200">{xpToNextRank.toLocaleString("de-DE")} XP</div></> : <><div className="text-amber-200">Höchster Rang erreicht</div><div className="mt-1 font-bold text-white">Du bist ein Meister!</div></>}
-        </div>
-      </div>
-      <p className="relative mt-5 border-t border-white/[.06] pt-4 text-xs leading-5 text-[#85869a]">Jeden Tag um 00:00 UTC werden automatisch 20 XP abgezogen. Wenn die App geschlossen ist, werden fehlende Tage beim nächsten Öffnen nachgeholt; dein XP-Stand fällt nie unter 0.</p>
-    </section>
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      {rankTiers.map((rank, index) => {
-        const isCurrent = currentRank === rank.name;
-        const isReached = level >= rank.minLevel;
-        const xpNeeded = (rank.minLevel - 1) * 100;
-        return <article key={rank.name} className={`panel rounded-2xl p-4 sm:p-5 ${isCurrent ? "border-violet-300/30 ring-1 ring-violet-300/10" : ""}`}>
-          <div className="flex items-start justify-between gap-3">
-            <div className={`grid h-11 w-11 place-items-center rounded-xl ${rank.name === "Meister" ? "bg-amber-300/10 text-amber-300" : isReached ? "bg-violet-400/10 text-violet-300" : "bg-white/[.04] text-[#66687d]"}`}><ShieldCheck size={21} /></div>
-            <span className={`rounded-md px-2 py-1 text-[10px] font-semibold ${isCurrent ? "bg-violet-400/15 text-violet-200" : isReached ? "bg-emerald-400/10 text-emerald-300" : "bg-white/[.04] text-[#77798b]"}`}>{isCurrent ? "Dein Rang" : isReached ? "Erreicht" : "Gesperrt"}</span>
-          </div>
-          <h3 className="display-font mt-4 text-xl font-bold">{rank.name}</h3>
-          <p className="mt-1 text-xs text-[#85869a]">Level {rank.minLevel}–{rank.maxLevel}</p>
-          <p className="mt-3 text-[11px] text-[#77798b]">Ab {xpNeeded.toLocaleString("de-DE")} XP</p>
-          {index === rankTiers.length - 1 && <p className="mt-3 border-t border-amber-300/10 pt-3 text-[11px] font-medium text-amber-200">Höchster Rang · Level 100 ist das Maximallevel</p>}
-        </article>;
-      })}
-    </section>
     <section className="space-y-4">
       <PageIntro icon={BookOpen} title="Deine Fachränge" description="Jedes Fach entwickelt sich durch Lernzeit, Noten und erledigte Aufgaben ganz individuell." />
       {subjectRanks.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -640,6 +613,33 @@ function RanksPage({ totalXP, homework, grades, studySessions }: {
           </article>;
         })}
       </div> : <div className="panel rounded-2xl p-5 text-sm text-[#85869a]">Sobald du Lernzeit erfasst, Noten einträgst oder Aufgaben einem Fach zuordnest, erscheint hier dein erster Fachrang.</div>}
+    </section>
+    <section className="panel relative overflow-hidden rounded-2xl p-5 sm:p-6">
+      <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full bg-violet-600/10 blur-3xl" />
+      <div className="relative flex flex-wrap items-center justify-between gap-5">
+        <div><p className="text-xs font-semibold uppercase tracking-[.14em] text-[#898a9f]">Dein aktueller Rang</p><h2 className="display-font mt-2 text-3xl font-bold text-violet-200">{currentRank}</h2><p className="mt-1 text-sm text-[#9293a5]">Level {level} · {totalXP.toLocaleString("de-DE")} XP</p></div>
+        <div className="rounded-xl border border-white/[.07] bg-black/15 px-4 py-3 text-sm">
+          {nextRank ? <><div className="text-[#9293a5]">Noch bis {nextRank.name}</div><div className="mt-1 font-bold text-violet-200">{xpToNextRank.toLocaleString("de-DE")} XP</div></> : <><div className="text-amber-200">Höchster Rang erreicht</div><div className="mt-1 font-bold text-white">Du bist ein Meister!</div></>}
+        </div>
+      </div>
+      <p className="relative mt-5 border-t border-white/[.06] pt-4 text-xs leading-5 text-[#85869a]">Jeden Tag um 00:00 UTC werden automatisch 20 XP abgezogen. Wenn die App geschlossen ist, werden fehlende Tage beim nächsten Öffnen nachgeholt; dein XP-Stand fällt nie unter 0.</p>
+    </section>
+    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {rankTiers.map((rank, index) => {
+        const isCurrent = currentRank === rank.name;
+        const isReached = level >= rank.minLevel;
+        const xpNeeded = (rank.minLevel - 1) * 100;
+        return <article key={rank.name} className={`panel rounded-2xl p-4 sm:p-5 ${isCurrent ? "border-violet-300/30 ring-1 ring-violet-300/10" : ""}`}>
+          <div className="flex items-start justify-between gap-3">
+            <div className={`grid h-11 w-11 place-items-center rounded-xl ${rank.name === "Meister" ? "bg-amber-300/10 text-amber-300" : isReached ? "bg-violet-400/10 text-violet-300" : "bg-white/[.04] text-[#66687d]"}`}><ShieldCheck size={21} /></div>
+            <span className={`rounded-md px-2 py-1 text-[10px] font-semibold ${isCurrent ? "bg-violet-400/15 text-violet-200" : isReached ? "bg-emerald-400/10 text-emerald-300" : "bg-white/[.04] text-[#77798b]"}`}>{isCurrent ? "Dein Rang" : isReached ? "Erreicht" : "Gesperrt"}</span>
+          </div>
+          <h3 className="display-font mt-4 text-xl font-bold">{rank.name}</h3>
+          <p className="mt-1 text-xs text-[#85869a]">Level {rank.minLevel}–{rank.maxLevel}</p>
+          <p className="mt-3 text-[11px] text-[#77798b]">Ab {xpNeeded.toLocaleString("de-DE")} XP</p>
+          {index === rankTiers.length - 1 && <p className="mt-3 border-t border-amber-300/10 pt-3 text-[11px] font-medium text-amber-200">Höchster Rang · Level 100 ist das Maximallevel</p>}
+        </article>;
+      })}
     </section>
   </div>;
 }
