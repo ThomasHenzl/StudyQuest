@@ -590,11 +590,12 @@ function RanksPage({ totalXP, homework, grades, studySessions }: {
       <PageIntro icon={BookOpen} title="Deine Fachränge" description="Jedes Fach entwickelt sich durch Lernzeit, Noten und erledigte Aufgaben ganz individuell." />
       {subjectRanks.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {subjectRanks.map(({ subject, xp }) => {
-          const subjectLevel = currentLevel(xp);
+          const subjectXPPerLevel = 20;
+          const subjectLevel = Math.min(100, Math.floor(xp / subjectXPPerLevel) + 1);
           const subjectRank = rankForLevel(subjectLevel);
           const nextSubjectRank = rankTiers.find((rank) => rank.minLevel > subjectLevel);
-          const progress = subjectLevel === 100 ? 100 : xp % 100;
-          const xpToNextSubjectRank = nextSubjectRank ? Math.max(0, (nextSubjectRank.minLevel - 1) * 100 - xp) : 0;
+          const progress = subjectLevel === 100 ? 100 : xp % subjectXPPerLevel / subjectXPPerLevel * 100;
+          const xpToNextSubjectRank = nextSubjectRank ? Math.max(0, (nextSubjectRank.minLevel - 1) * subjectXPPerLevel - xp) : 0;
           return <article key={subject} className="panel rounded-2xl p-4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -607,7 +608,7 @@ function RanksPage({ totalXP, homework, grades, studySessions }: {
               <div className="progress-fill h-full rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-2 flex justify-between gap-3 text-[11px] text-[#838498]">
-              <span>{subjectLevel === 100 ? "Maximallevel erreicht" : `${progress} / 100 XP bis Level ${subjectLevel + 1}`}</span>
+              <span>{subjectLevel === 100 ? "Maximallevel erreicht" : `${xp % subjectXPPerLevel} / ${subjectXPPerLevel} XP bis Level ${subjectLevel + 1}`}</span>
               <span className="shrink-0">{nextSubjectRank ? `${xpToNextSubjectRank} XP bis ${nextSubjectRank.name}` : "Meister"}</span>
             </div>
           </article>;

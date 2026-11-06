@@ -44,5 +44,5 @@ Mit konfiguriertem Supabase werden Registrierung, Anmeldung und Fortschritt übe
 - Prüfungsnoten 1–5: 400 / 300 / 200 / 100 / 0 XP
 - Levels benötigen jeweils 100 XP; die maximale Stufe ist 100.
 - Beim ersten Laden an einem neuen UTC-Kalendertag werden automatisch 20 XP abgezogen. Nach Pausen werden versäumte Tagesabzüge nachgeholt; XP können nicht unter 0 fallen.
-- Die Ränge reichen von Anfänger (Level 1) bis Meister (Level 76–100). Die Ränge-Ansicht zeigt den aktuellen und den höchsten Rang sowie einen eigenen Rang pro Fach. Fach-XP kommen aus Lernzeit, Noten und erledigten Aufgaben.
+- Die Ränge reichen von Anfänger (Level 1) bis Meister (Level 76–100). Die Ränge-Ansicht zeigt den aktuellen und den höchsten Rang sowie einen eigenen Rang pro Fach. Fach-XP kommen aus Lernzeit, Noten und erledigten Aufgaben; Fachlevel benötigen 20 XP statt 100 XP.
 - Wiederholte Abschlüsse und Quest-/Achievement-Belohnungen sind pro Datensatz bzw. Zeitraum gegen doppelte XP abgesichert.
