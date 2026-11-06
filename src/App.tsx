@@ -339,7 +339,7 @@ function App() {
           {page === "Aufgaben" && <HomeworkPage homework={homework} onAdd={() => { setEditingHomework(null); setShowHomeworkForm(true); }} onEdit={(item) => { setEditingHomework(item); setShowHomeworkForm(true); }} onComplete={completeHomework} onDelete={(id) => void runAction(() => deleteHomework(session.user.id, id), "Aufgabe gelöscht.")} />}
           {page === "Noten" && <GradesPage grades={grades} average={average} onAdd={() => setShowGradeForm(true)} />}
           {page === "Statistiken" && <StatisticsPage stats={stats} grades={grades} average={average} chartData={chartData} events={events} />}
-          {page === "Ränge" && <RanksPage totalXP={profile?.total_xp ?? 0} />}
+          {page === "Ränge" && <RanksPage totalXP={profile?.total_xp ?? 0} homework={homework} grades={grades} studySessions={studySessions} />}
           {page === "Erfolge" && <AchievementsPage stats={stats} profile={profile} unlocked={unlocked} onUnlock={unlockAchievement} />}
         </main>
       </div>
@@ -560,11 +560,30 @@ function AchievementsPage({ stats, profile, unlocked, onUnlock }: { stats: Stats
   })}</div></div>;
 }
 
-function RanksPage({ totalXP }: { totalXP: number }) {
+function RanksPage({ totalXP, homework, grades, studySessions }: {
+  totalXP: number;
+  homework: Homework[];
+  grades: Grade[];
+  studySessions: StudySession[];
+}) {
   const level = currentLevel(totalXP);
   const currentRank = rankForLevel(level);
   const nextRank = rankTiers.find((rank) => rank.minLevel > level);
   const xpToNextRank = nextRank ? Math.max(0, (nextRank.minLevel - 1) * 100 - totalXP) : 0;
+  const subjectProgress = new Map<string, { subject: string; xp: number }>();
+  const addSubjectXP = (subject: string, xp: number) => {
+    const key = subject.trim().toLocaleLowerCase("de-DE");
+    if (!key) return;
+    const existing = subjectProgress.get(key);
+    subjectProgress.set(key, { subject: existing?.subject ?? subject.trim(), xp: (existing?.xp ?? 0) + xp });
+  };
+  studySessions.forEach((item) => addSubjectXP(item.subject, item.minutes));
+  grades.forEach((item) => addSubjectXP(item.subject, item.xp_earned));
+  homework.forEach((item) => {
+    if (item.completed_at) addSubjectXP(item.subject, 50);
+    else addSubjectXP(item.subject, 0);
+  });
+  const subjectRanks = [...subjectProgress.values()].sort((a, b) => b.xp - a.xp || a.subject.localeCompare(b.subject, "de"));
   return <div className="space-y-5">
     <PageIntro icon={ShieldCheck} title="Ränge" description="Sieh deinen Fortschritt und alle erreichbaren Ränge." />
     <section className="panel relative overflow-hidden rounded-2xl p-5 sm:p-6">
@@ -593,6 +612,34 @@ function RanksPage({ totalXP }: { totalXP: number }) {
           {index === rankTiers.length - 1 && <p className="mt-3 border-t border-amber-300/10 pt-3 text-[11px] font-medium text-amber-200">Höchster Rang · Level 100 ist das Maximallevel</p>}
         </article>;
       })}
+    </section>
+    <section className="space-y-4">
+      <PageIntro icon={BookOpen} title="Deine Fachränge" description="Jedes Fach entwickelt sich durch Lernzeit, Noten und erledigte Aufgaben ganz individuell." />
+      {subjectRanks.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {subjectRanks.map(({ subject, xp }) => {
+          const subjectLevel = currentLevel(xp);
+          const subjectRank = rankForLevel(subjectLevel);
+          const nextSubjectRank = rankTiers.find((rank) => rank.minLevel > subjectLevel);
+          const progress = subjectLevel === 100 ? 100 : xp % 100;
+          const xpToNextSubjectRank = nextSubjectRank ? Math.max(0, (nextSubjectRank.minLevel - 1) * 100 - xp) : 0;
+          return <article key={subject} className="panel rounded-2xl p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate font-semibold">{subject}</h3>
+                <p className="mt-1 text-xs text-[#85869a]">Level {subjectLevel} · {xp.toLocaleString("de-DE")} XP</p>
+              </div>
+              <span className="shrink-0 rounded-md bg-violet-400/15 px-2 py-1 text-xs font-semibold text-violet-200">{subjectRank}</span>
+            </div>
+            <div className="progress-track mt-4 h-2 overflow-hidden rounded-full">
+              <div className="progress-fill h-full rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="mt-2 flex justify-between gap-3 text-[11px] text-[#838498]">
+              <span>{subjectLevel === 100 ? "Maximallevel erreicht" : `${progress} / 100 XP bis Level ${subjectLevel + 1}`}</span>
+              <span className="shrink-0">{nextSubjectRank ? `${xpToNextSubjectRank} XP bis ${nextSubjectRank.name}` : "Meister"}</span>
+            </div>
+          </article>;
+        })}
+      </div> : <div className="panel rounded-2xl p-5 text-sm text-[#85869a]">Sobald du Lernzeit erfasst, Noten einträgst oder Aufgaben einem Fach zuordnest, erscheint hier dein erster Fachrang.</div>}
     </section>
   </div>;
 }
