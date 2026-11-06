@@ -16,12 +16,21 @@ Ohne Supabase läuft StudyQuest im lokalen Testmodus. Konto und Fortschritt blei
 2. Öffne im Repository **Settings → Pages** und wähle unter **Build and deployment** als Quelle **GitHub Actions**.
 3. Der Workflow baut und veröffentlicht die Website nach jedem Push auf `main`. Die veröffentlichte URL findest du anschließend unter **Settings → Pages**.
 
-Ohne Supabase ist die Website öffentlich erreichbar, aber Konten und Lernstände werden nur lokal im jeweiligen Browser gespeichert und nicht zwischen Geräten synchronisiert. Für gemeinsame Online-Daten richte Supabase ein und hinterlege dessen `VITE_SUPABASE_URL` und `VITE_SUPABASE_ANON_KEY` als GitHub-Actions-Variablen.
+Ohne Supabase ist die Website öffentlich erreichbar, aber Konten und Lernstände werden nur lokal im jeweiligen Browser gespeichert und nicht zwischen Geräten synchronisiert. Für gemeinsame Online-Daten:
+
+1. Erstelle ein Projekt auf [supabase.com](https://supabase.com/) und öffne dessen **SQL Editor**.
+2. Führe die drei Dateien unter `supabase/migrations/` der Reihe nach aus: zuerst `202611050001_studyquest.sql`, dann `202611050002_adjustable_study_time.sql` und zuletzt `202611060001_daily_xp_decay.sql`.
+3. Öffne in GitHub **Settings → Secrets and variables → Actions → Variables** und füge diese Repository-Variablen hinzu:
+   - `VITE_SUPABASE_URL`: die **Project URL** aus den Supabase-Projekteinstellungen
+   - `VITE_SUPABASE_ANON_KEY`: der **anon/public key** aus den Supabase-API-Einstellungen
+4. Starte unter GitHub **Actions → Deploy to GitHub Pages → Run workflow** eine neue Veröffentlichung.
+
+Der Deploy-Workflow verwendet diese Variablen beim Build. Der anon/public key ist für den Einsatz im Browser vorgesehen; den **service_role key** niemals eintragen oder veröffentlichen. Nach dem Deployment können sich Nutzer registrieren und ihre Daten über verschiedene Geräte hinweg speichern.
 
 ## Echtes Online-Konto (optional)
 
 1. Installiere die Abhängigkeiten: `npm install`
-2. Führe `supabase/migrations/202611050001_studyquest.sql` im SQL-Editor deines Supabase-Projekts aus. Bei einer bestehenden Installation führe die Migrationen `supabase/migrations/202611050002_adjustable_study_time.sql` und `supabase/migrations/202611060001_daily_xp_decay.sql` aus.
+2. Führe die drei SQL-Dateien unter `supabase/migrations/` der Reihe nach im SQL-Editor deines Supabase-Projekts aus.
 3. Kopiere `.env.example` nach `.env.local` und trage die Project URL sowie den anon/public key aus den Supabase-Projekteinstellungen ein.
 4. Starte die App mit `npm run dev` neu. Einen Produktionsbuild erstellst du mit `npm run build`.
 
