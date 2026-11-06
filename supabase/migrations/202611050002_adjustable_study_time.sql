@@ -23,14 +23,14 @@ begin
   earned := public.award_xp(auth.uid(), 'study', new_id::text, p_minutes || ' Minuten gelernt', p_minutes);
 
   select last_study_date into previous_date from public.profiles where id = auth.uid() for update;
-  update public.profiles
+  update public.profiles as profile
   set streak_days = case
-      when last_study_date = today then streak_days
-      when last_study_date = today - 1 then streak_days + 1
+      when profile.last_study_date = today then profile.streak_days
+      when profile.last_study_date = today - 1 then profile.streak_days + 1
       else 1
     end,
     last_study_date = today
-  where id = auth.uid();
+  where profile.id = auth.uid();
   return query select new_id, earned, p.total_xp, p.streak_days
   from public.profiles p where p.id = auth.uid();
 end;
