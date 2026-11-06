@@ -170,7 +170,12 @@ export function subscribeToAuth(listener: (session: AppSession | null) => void) 
 }
 export async function register(email: string, password: string, name: string) {
   if (!isLocalMode) {
-    const { data, error } = await supabase!.auth.signUp({ email, password, options: { data: { display_name: name } } });
+    const emailRedirectTo = `${window.location.origin}${window.location.pathname}`;
+    const { data, error } = await supabase!.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: name }, emailRedirectTo },
+    });
     if (error) throw error;
     return { emailConfirmationRequired: !data.session };
   }
@@ -186,6 +191,16 @@ export async function register(email: string, password: string, name: string) {
   saveDatabase(database);
   notifyLocalAuth();
   return { emailConfirmationRequired: false };
+}
+export async function resendSignupConfirmation(email: string) {
+  if (isLocalMode) throw new Error("E-Mail-Bestätigung ist im lokalen Testmodus nicht verfügbar.");
+  const emailRedirectTo = `${window.location.origin}${window.location.pathname}`;
+  const { error } = await supabase!.auth.resend({
+    type: "signup",
+    email: email.trim(),
+    options: { emailRedirectTo },
+  });
+  if (error) throw error;
 }
 export async function signIn(email: string, password: string) {
   if (!isLocalMode) {

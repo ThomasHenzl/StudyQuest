@@ -12,6 +12,7 @@ import {
   claimQuest as claimQuestReward, completeHomework as completeHomeworkReward, createHomework,
   deleteHomework, getAppSession, getInitialAuthMode, isLocalMode, loadUserData, recordStudySession,
   register, saveProfile as saveUserProfile, signIn, signOut, subscribeToAuth,
+  resendSignupConfirmation,
   submitGrade, unlockAchievement as unlockAchievementReward, updateHomework,
   type AppSession, type Grade, type Homework, type Profile, type StudySession, type XPEvent,
 } from "./lib/backend";
@@ -363,8 +364,9 @@ function NavButton({ item, page, onClick }: { item: { name: NavPage; icon: typeo
 }
 function LoadingScreen() { return <div className="app-shell grid min-h-screen place-items-center"><div className="flex items-center gap-3 text-sm text-[#9d9caf]"><div className="h-5 w-5 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />Dein Abenteuer wird geladen …</div></div>; }
 function AuthScreen({ mode, setMode, busy, setBusy, error, setError, localMode }: { mode: "login" | "register"; setMode: (mode: "login" | "register") => void; busy: boolean; setBusy: (busy: boolean) => void; error: string; setError: (error: string) => void; localMode: boolean }) {
+  const [confirmationPending, setConfirmationPending] = useState(false);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); setBusy(true); setError("");
+    event.preventDefault(); setBusy(true); setError(""); setConfirmationPending(false);
     const data = new FormData(event.currentTarget);
     const email = String(data.get("email")).trim();
     const password = String(data.get("password"));
@@ -372,14 +374,27 @@ function AuthScreen({ mode, setMode, busy, setBusy, error, setError, localMode }
       if (mode === "register") {
         const displayName = String(data.get("display_name")).trim();
         const result = await register(email, password, displayName);
-        if (result.emailConfirmationRequired) setError("Fast geschafft! Bitte bestätige deine E-Mail-Adresse über den Link in deinem Postfach.");
+        if (result.emailConfirmationRequired) {
+          setConfirmationPending(true);
+          setError("Fast geschafft! Bitte bestätige deine E-Mail-Adresse über den Link in deinem Postfach.");
+        }
       } else {
         await signIn(email, password);
       }
     } catch (cause) { setError(errorText(cause)); }
     finally { setBusy(false); }
   };
-  return <div className="app-shell grid min-h-screen place-items-center px-4 py-10"><div className="panel w-full max-w-[430px] rounded-3xl p-7 sm:p-9"><Brand />{localMode && <div className="mt-6 rounded-xl border border-amber-300/15 bg-amber-300/[.06] px-3 py-2 text-xs leading-5 text-amber-100/80">Lokales Testkonto: deine Daten bleiben in diesem Browser und werden nicht online synchronisiert.</div>}<div className="mt-8"><h1 className="display-font text-2xl font-bold">{mode === "login" ? "Willkommen zurück!" : "Konto erstellen"}</h1><p className="mt-2 text-sm text-[#9293a7]">{mode === "login" ? "Melde dich an und setze deine Quest fort." : "Erstelle dein Konto und starte dein Lernabenteuer."}</p></div><form onSubmit={submit} className="mt-7 space-y-4">{mode === "register" && <Field label="Dein Name"><input name="display_name" required maxLength={40} autoComplete="name" placeholder="Alex" className="input" /></Field>}<Field label="E-Mail"><input type="email" name="email" required autoComplete="email" placeholder="du@beispiel.de" className="input" /></Field><Field label="Passwort"><input type="password" name="password" required minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Mindestens 8 Zeichen" className="input" /></Field>{error && <div role="alert" className={`rounded-xl border p-3 text-sm ${error.startsWith("Fast") ? "border-emerald-400/15 bg-emerald-400/[.06] text-emerald-200" : "border-red-400/15 bg-red-400/[.06] text-red-200"}`}>{error}</div>}<button disabled={busy} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-bold shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:opacity-60">{busy ? "Einen Moment …" : mode === "login" ? "Anmelden" : "Konto erstellen"}{!busy && <ChevronRight size={17} />}</button></form><div className="mt-6 text-center text-sm text-[#8e8fa2]">{mode === "login" ? "Noch kein Konto?" : "Schon ein Konto?"} <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }} className="ml-1 font-semibold text-violet-300 hover:text-violet-200">{mode === "login" ? "Registrieren" : "Anmelden"}</button></div><div className="mt-7 flex items-center justify-center gap-2 text-xs text-[#686a7c]"><ShieldCheck size={14} /> {localMode ? "Testkonto nur auf diesem Gerät" : "Deine Daten sind geschützt."}</div></div></div>;
+  const resendConfirmation = async (form: HTMLFormElement) => {
+    const email = String(new FormData(form).get("email")).trim();
+    if (!email) return;
+    setBusy(true);
+    try {
+      await resendSignupConfirmation(email);
+      setError("Ein neuer Bestätigungslink wurde angefordert. Bitte prüfe dein Postfach.");
+    } catch (cause) { setError(errorText(cause)); }
+    finally { setBusy(false); }
+  };
+  return <div className="app-shell grid min-h-screen place-items-center px-4 py-10"><div className="panel w-full max-w-[430px] rounded-3xl p-7 sm:p-9"><Brand />{localMode && <div className="mt-6 rounded-xl border border-amber-300/15 bg-amber-300/[.06] px-3 py-2 text-xs leading-5 text-amber-100/80">Lokales Testkonto: deine Daten bleiben in diesem Browser und werden nicht online synchronisiert.</div>}<div className="mt-8"><h1 className="display-font text-2xl font-bold">{mode === "login" ? "Willkommen zurück!" : "Konto erstellen"}</h1><p className="mt-2 text-sm text-[#9293a7]">{mode === "login" ? "Melde dich an und setze deine Quest fort." : "Erstelle dein Konto und starte dein Lernabenteuer."}</p></div><form onSubmit={submit} className="mt-7 space-y-4">{mode === "register" && <Field label="Dein Name"><input name="display_name" required maxLength={40} autoComplete="name" placeholder="Alex" className="input" /></Field>}<Field label="E-Mail"><input type="email" name="email" required autoComplete="email" placeholder="du@beispiel.de" className="input" /></Field><Field label="Passwort"><input type="password" name="password" required minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Mindestens 8 Zeichen" className="input" /></Field>{error && <div role="alert" className={`rounded-xl border p-3 text-sm ${error.startsWith("Fast") || error.startsWith("Ein neuer Bestätigungslink") ? "border-emerald-400/15 bg-emerald-400/[.06] text-emerald-200" : "border-red-400/15 bg-red-400/[.06] text-red-200"}`}>{error}</div>}{confirmationPending && <button type="button" disabled={busy} onClick={(event) => void resendConfirmation(event.currentTarget.form!)} className="w-full text-xs font-semibold text-violet-300 hover:text-violet-200 disabled:opacity-60">Bestätigungslink erneut senden</button>}<button disabled={busy} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-bold shadow-lg shadow-violet-950/30 transition hover:brightness-110 disabled:opacity-60">{busy ? "Einen Moment …" : mode === "login" ? "Anmelden" : "Konto erstellen"}{!busy && <ChevronRight size={17} />}</button></form><div className="mt-6 text-center text-sm text-[#8e8fa2]">{mode === "login" ? "Noch kein Konto?" : "Schon ein Konto?"} <button onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }} className="ml-1 font-semibold text-violet-300 hover:text-violet-200">{mode === "login" ? "Registrieren" : "Anmelden"}</button></div><div className="mt-7 flex items-center justify-center gap-2 text-xs text-[#686a7c]"><ShieldCheck size={14} /> {localMode ? "Testkonto nur auf diesem Gerät" : "Deine Daten sind geschützt."}</div></div></div>;
 }
 
 function DashboardPage(props: {
